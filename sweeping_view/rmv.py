@@ -5,7 +5,7 @@ import logging
 from .base import BaseReplay
 from .exceptions import InvalidReplayError, UnknownFormatVersionError
 
-logger = logging.Logger()
+logger = logging.getLogger(__name__)
 
 
 class RMVReplay(BaseReplay):
