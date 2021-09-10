@@ -20,6 +20,17 @@ the implemented formats to rawvf, an entirely text-based format.
 What this library doesn't do is make any attempt to verify checksums. Those
 remain as the primary obstacle to generating fake replays.
 
+## Similar projects
+
+### Rawvf
+
+Rawvf is a plain-text minesweeper replay format. A collection of command line
+tools to convert various formats to it can be found here:
+https://github.com/thefinerminer/minesweeper-rawvf
+
+Rawvf offers far better support (more formats/old versions of formats), but the
+tools aren't usable as libraries.
+
 ## State of completion and stability
 
 This library is still very much in development, and parts of the public API may
