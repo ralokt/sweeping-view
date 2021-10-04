@@ -79,7 +79,4 @@ print(rmv.mines)
 {'name': 'tkolar'}
 {'questionmarks': False, 'nonflagging': True, 'mode': 'normal', 'level': 'beginner'}
 [(1, 3), (2, 3), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (5, 4), (6, 6), (7, 6)]
-'Tommy'
-{'level': 'beginner', 'questionmarks': False}
-[(4, 1), (5, 2), (8, 2), (2, 3), (6, 3), (4, 5), (8, 5), (6, 6), (8, 6), (4, 7)]
 ```
