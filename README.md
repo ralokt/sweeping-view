@@ -10,7 +10,9 @@ Formats:
  - AVF (Minesweeper Arbiter, Freesweeper)
 
 Tested Python versions:
+ - 3.7
  - 3.9
+I see no reason why it shouldn't work on 3.8 or later versions as well.
 
 ## Is this a good idea? Shouldn't the formats be secret?
 
