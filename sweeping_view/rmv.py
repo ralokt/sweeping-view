@@ -184,7 +184,6 @@ class RMVReplay(BaseReplay):
                         # (it is not the board, in any case)
                         "xpos": xpos - 12,
                         "ypos": ypos - 56,
-                        "row": row,
                     }
                 )
 
