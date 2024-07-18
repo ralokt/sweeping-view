@@ -1,0 +1,4 @@
+setuptools_scm>=8.1.0
+pytest>=8.2.2
+ms_toollib==1.4.8
+
