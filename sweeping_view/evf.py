@@ -159,5 +159,8 @@ class EVFReplay(BaseReplay):
             result.append(next)
         return b"".join(result)
 
+    def get_best_token_source(self):
+        return self.competition_identifier
+
     def get_boardgen_time(self):
         return datetime.fromtimestamp(int(self.start_ts) // 1000000)

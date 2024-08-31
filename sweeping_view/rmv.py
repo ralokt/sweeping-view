@@ -214,5 +214,11 @@ class RMVReplay(BaseReplay):
         self.timeth = self.read_int(data.read(3))
         self.checksum = data.read(checksum_size)
 
+    def get_best_token_source(self):
+        token = self.player_data.get("token", None)
+        if token is None:
+            token = self.result_str_dict["NICK"]
+        return token
+
     def get_boardgen_time(self):
         return datetime.fromtimestamp(self.timestamp_boardgen)
