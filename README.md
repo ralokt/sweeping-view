@@ -56,8 +56,8 @@ tools aren't usable as libraries.
 
 ## State of completion and stability
 
-This library is still very much in development, and parts of the public API may
-change completely - this is because while both existing parsers work for now,
+This library is still a work in progress, and parts of the public API may
+change completely - this is because while all existing parsers work for now,
 not much care has been taken to make them consistent.
 
 ## Example use
