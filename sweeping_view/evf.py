@@ -80,8 +80,8 @@ class EVFReplay(BaseReplay):
         self.uuid = self.read_c_string(data)
         board = EVFBoard(data.read((self.cols * self.rows - 1) // 8 + 1), self.cols)
 
-        self.game_mode = self.MODES.get(game_mode_raw, None)
-        if self.game_mode is None:
+        game_mode = self.MODES.get(game_mode_raw, None)
+        if game_mode is None:
             raise InvalidReplayError(
                 f"Invalid game mode {game_mode_raw}!",
             )
@@ -126,6 +126,7 @@ class EVFReplay(BaseReplay):
         self.properties = {
             "questionmarks": not qm_disabled,
             "nonflagging": nf,
+            "mode": game_mode,
         }
 
     def read_c_string(self, data):
