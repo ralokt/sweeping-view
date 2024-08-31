@@ -1,13 +1,14 @@
 # Sweeping View
 
 Sweeping view is a library that can parse replay files produced by official
-Minesweeper clones.
+Minesweeper clones, as well as Metasweeper.
 
 ## Currently supported:
 
 Formats:
  - RMV (Viennasweeper)
  - AVF (Minesweeper Arbiter, Freesweeper)
+ - EVF (Metasweeper)
 
 Tested Python versions:
  - 3.6
@@ -85,4 +86,25 @@ print(rmv.mines)
 {'name': 'tkolar'}
 {'questionmarks': False, 'nonflagging': True, 'mode': 'normal', 'level': 'beginner'}
 [(1, 3), (2, 3), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (5, 4), (6, 6), (7, 6)]
+```
+
+### Metasweeper
+
+#### code
+```python
+from sweeping_view.evf import EVFReplay
+
+evf = EVFReplay.from_file("test_subject.evf")
+
+print(evf.user_identifier)
+print(rmv.bbbv)
+print(rmv.timeth)
+```
+
+#### output
+
+```python
+Szymon_M
+167
+69597
 ```
