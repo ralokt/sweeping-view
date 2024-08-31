@@ -1,10 +1,12 @@
 from .avf import AVFReplay
 from .exceptions import MimeTypeNotImplemented, UnknownMimeType
+from .evf import EVFReplay
 from .rmv import RMVReplay
 
 MIME_TYPES = {
     "application/x-minesweeper-arbiter": AVFReplay,
     "application/x-viennasweeper": RMVReplay,
+    "application/x-metasweeper": EVFReplay,
     "application/x-minesweeper-x": NotImplemented,
 }
 
