@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 import logging
 
 from .base import BaseReplay
@@ -212,3 +213,6 @@ class RMVReplay(BaseReplay):
 
         self.timeth = self.read_int(data.read(3))
         self.checksum = data.read(checksum_size)
+
+    def get_boardgen_time(self):
+        return datetime.fromtimestamp(self.timestamp_boardgen)

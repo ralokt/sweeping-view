@@ -173,6 +173,9 @@ class AVFReplay(BaseReplay):
         self.timeth = self.events[-2]["gametime"]
         self.name, self.version_info = footer_positional
 
+    def get_boardgen_time(self):
+        return self.boardgen_time
+
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from .base import BaseReplay
 from .exceptions import InvalidReplayError
 
@@ -156,3 +158,6 @@ class EVFReplay(BaseReplay):
                 raise InvalidReplayError("EOF while reading null-terminated string")
             result.append(next)
         return b"".join(result)
+
+    def get_boardgen_time(self):
+        return datetime.fromtimestamp(int(self.start_ts) // 1000000)
