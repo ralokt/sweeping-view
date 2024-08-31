@@ -123,10 +123,24 @@ class EVFReplay(BaseReplay):
         else:
             self.checksum = None
 
+        level = {
+            (8, 8, 10): "beginner",
+            (16, 16, 40): "intermediate",
+            (30, 16, 40): "expert",
+        }.get(
+            (
+                self.cols,
+                self.rows,
+                self.num_mines,
+            ),
+            "custom",
+        )
+
         self.properties = {
             "questionmarks": not qm_disabled,
             "nonflagging": nf,
             "mode": game_mode,
+            "level": level,
         }
 
     def read_c_string(self, data):
