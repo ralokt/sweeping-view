@@ -3,6 +3,10 @@
 Sweeping view is a library that can parse replay files produced by official
 Minesweeper clones, as well as Metasweeper.
 
+It's fairly bare-bones, and doesn't do much more than parse replay files. If
+you want to do actual analysis of replay files, even just getting board events
+from mouse events, you probably want to use `ms-toollib` instead (see below).
+
 ## Currently supported:
 
 Formats:
@@ -28,6 +32,18 @@ What this library doesn't do is make any attempt to verify checksums. Those
 remain as the primary obstacle to generating fake replays.
 
 ## Similar projects
+
+### `ms-toollib`
+
+`ms-toollib` is a library that provides way more features than `sweeping-view`.
+
+Besides replay parsing, it also provides a fully featured minesweeper engine,
+as well as numerous algorithms. It is written in Rust, but there is a Python
+package of the same name on PyPI.
+https://github.com/eee555/ms-toollib/
+
+On the other hand, `sweeping-view` is pure Python and has zero dependencies -
+so if all you need is metadata, it might be all you need!
 
 ### Rawvf
 
