@@ -1,3 +1,4 @@
+from datetime import datetime
 
 import pytest
 
@@ -12,6 +13,7 @@ def test_evf(replay_path):
     assert evf.unique_identifier == ""
     assert evf.timeth == 69597
     assert evf.bbbv == 167
+    assert evf.get_boardgen_time() == datetime(2024, 8, 30, 22, 11, 41)
     assert set(evf.mines) == {
         (4, 0),
         (10, 0),

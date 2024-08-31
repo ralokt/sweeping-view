@@ -1,3 +1,4 @@
+from datetime import datetime
 
 import pytest
 
@@ -9,6 +10,7 @@ def test_avf(replay_path):
 
     assert avf.name == "Tommy"
     assert avf.properties["level"] == "beginner"
+    assert avf.get_boardgen_time() == datetime(2021, 5, 22, 16, 39, 5, 912000)
     assert set(avf.mines) == {
         (4, 1),
         (5, 2),
