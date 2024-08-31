@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
 from io import SEEK_CUR
 from itertools import count
@@ -86,6 +87,29 @@ class AVFReplay(BaseReplay):
         self.ts_info = info.decode("cp1252")
         ts_fields = self.ts_info.split("|")
         self.bbbv = ts_fields[-1][1:].split("T")[0]
+        # cus [<mode>|<custom_data>|<timestamp>]
+        # beg/int/exp [<mode>|<timestamp>]
+        ts_boardgen = ts_fields[2 if level == 6 else 1]
+        # dd[.mm.yyyy].hh:mm:ss:<millisecond_garbage (see below)>
+        *date_parts, time_parts = ts_boardgen.split(".")
+        time_parts = time_parts.split(":")
+        milliseconds_str = time_parts.pop()
+        time_parts = list(map(int, time_parts))
+        date_parts = (list(map(int, date_parts)) + [None, None])[:3]
+        year = date_parts[2] or 1970
+        month = date_parts[1] or 1
+        day = date_parts[0]
+        # wtf?
+        # arbiter generates the milliseconds string as a string concatenation of
+        #   MS div 100
+        #   MS div 10
+        #   MS mod 10
+        # if the leading digit is nonzero, MS div 10 has 2 digits, and the leading
+        # digit appears twice
+        # this is conveniently the case where we have 4 digits, and the leading
+        # digit will be the first one -> cut it off
+        microseconds = int(milliseconds_str[-3:]) * 1000
+        self.boardgen_time = datetime(year, month, day, *time_parts[:3], microseconds)
 
         last = ord(data.read(1))
         while True:
