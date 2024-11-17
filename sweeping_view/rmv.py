@@ -155,7 +155,7 @@ class RMVReplay(BaseReplay):
         if ftype == 1 and properties_size > 4:
             utf8 = properties[4]
         if ftype >= 2:
-            bbbv = properties[4] + properties[5] << 8
+            bbbv = properties[4] + (properties[5] << 8)
             self.square_size = properties[6]
 
         # TODO: verify that cp1252 is correct, or add encoding parameter
