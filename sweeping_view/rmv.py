@@ -32,6 +32,7 @@ class RMVReplay(BaseReplay):
         5: "rmb_up",
         6: "mmb_down",
         7: "mmb_up",
+        28: "move",  # reduced version
     }
 
     BOARD_EVENT_TYPES = {
@@ -70,23 +71,32 @@ class RMVReplay(BaseReplay):
         # header 1
         extension = data.read(4)
         ftype = self.read_int(data.read(2))
-        filesize = self.read_int(data.read(4))
 
-        if ftype != 1:
+        if not (1 <= ftype <= 2):
             raise UnknownFormatVersionError(self, ftype)
 
+        if ftype >= 2:
+            clone_id = self.read_int(data.read(1))
+            major_version_of_clone = self.read_int(data.read(1))
+
+        filesize = self.read_int(data.read(4))
+
         # header 2
-        result_str_size = self.read_int(data.read(2))
+        if ftype == 1:
+            result_str_size = self.read_int(data.read(2))
         version_info_size = self.read_int(data.read(2))
         player_info_size = self.read_int(data.read(2))
         board_size = self.read_int(data.read(2))
         preflagged_size = self.read_int(data.read(2))
         properties_size = self.read_int(data.read(2))
+        if ftype >= 2:
+            extension_properties_size = self.read_int(data.read(2))
         vid_size = self.read_int(data.read(4))
         checksum_size = self.read_int(data.read(2))
 
-        # result string
-        result_str = data.read(result_str_size)
+        if ftype == 1:
+            # result string
+            result_str = data.read(result_str_size)
 
         # version information
         self.version_info = data.read(version_info_size)
@@ -128,9 +138,12 @@ class RMVReplay(BaseReplay):
         for _ in range(properties_size):
             properties.append(ord(data.read(1)))
 
+        utf8 = ftype >= 2
+        self.square_size = 16
+        bbbv = None
+
         self.properties["questionmarks"] = bool(properties[0])
         self.properties["nonflagging"] = bool(properties[1])
-
         try:
             self.properties["mode"] = self.MODES[properties[2]]
         except KeyError:
@@ -139,25 +152,46 @@ class RMVReplay(BaseReplay):
             self.properties["level"] = self.LEVELS[properties[3]]
         except KeyError:
             raise InvalidReplayError(self, message="Invalid level!")
-        if properties_size > 4 and properties[4]:
-            encoding = "utf-8"
-        else:
-            # TODO: verify or add encoding parameter
-            encoding = "cp1252"
-        self.events = []
+        if ftype == 1 and properties_size > 4:
+            utf8 = properties[4]
+        if ftype >= 2:
+            bbbv = properties[4] + properties[5] << 8
+            self.square_size = properties[6]
+
+        # TODO: verify that cp1252 is correct, or add encoding parameter
+        encoding = "utf-8" if utf8 else "cp1252"
+
         self.player_data = {
             name: value.decode(encoding) for name, value in player_data.items()
         }
 
-        result_str_field_list = [
-            i.strip() for i in result_str.decode(encoding).split("#") if i.strip()
-        ]
+        result_str_field_list = (
+            [i.strip() for i in result_str.decode(encoding).split("#") if i.strip()]
+            if ftype == 1
+            else []
+        )
         self.result_str_dict = {
             key.strip(): value.strip()
             for key, value in (field.split(":") for field in result_str_field_list)
         }
-        self.bbbv = int(self.result_str_dict["3BV"])
+        self.bbbv = int(self.result_str_dict["3BV"]) if bbbv is None else bbbv
 
+        self.extension_properties = {}
+        if ftype >= 2:
+            num_properties = self.read_int(data.read(2))
+            for _ in range(num_properties):
+                key_size = ord(data.read(1))
+                key = data.read(key_size).decode(encoding)
+                value_size = ord(data.read(1))
+                value = data.read(value_size)
+                self.extension_properties[key] = value
+
+        self.events = []
+        xpos = None
+        ypos = None
+        gametime = None
+        nFlags = None
+        (xoffs, yoffs) = (12, 56) if ftype == 1 else (0, 0)
         while data:
             evcode = ord(data.read(1))
             if evcode == 0:
@@ -169,22 +203,42 @@ class RMVReplay(BaseReplay):
                         "new_timestamp": new_timestamp,
                     }
                 )
-            elif 1 <= evcode <= 7:
-                gametime = self.read_int(data.read(3))
-                numflags = ord(data.read(1))
-                xpos = self.read_int(data.read(2))
-                ypos = self.read_int(data.read(2))
+            elif 1 <= evcode <= 7 or evcode == 28:
+                if evcode == 28:
+                    if gametime is None or xpos is None or ypos is None:
+                        raise InvalidReplayError(
+                            self,
+                            message="first mouse event was reduced mouse move",
+                        )
+                    gametime += ord(data.read(1))
+                    mv = ord(data.read(1))
+                    # two 4bit two's complement signed integers
+                    # n & 7 = last three digits
+                    # n & 8 = the leading digit (that has a negative weight in
+                    # two's complement)
+                    # and of course the xpos change gets shifted into place
+                    xpos += (mv >> 4) & 7
+                    xpos -= (mv >> 4) & 8
+                    ypos += mv & 7
+                    ypos -= mv & 8
+                else:
+                    gametime = self.read_int(data.read(3))
+                    nFlags = ord(data.read(1))
+                    xpos = self.read_int(data.read(2))
+                    ypos = self.read_int(data.read(2))
                 self.events.append(
                     {
                         "type": "mouse",
                         "subtype": self.MOUSE_EVENT_TYPES[evcode],
                         "gametime": gametime,
-                        "numflags": numflags,
-                        # compensate for vsweep offsetting these coords from
-                        # the upper left corner of the window, or whatever
-                        # (it is not the board, in any case)
-                        "xpos": xpos - 12,
-                        "ypos": ypos - 56,
+                        "nFlags": nFlags,
+                        # in RMV v1, these coordinates are relative to the top
+                        # right corner of the client area (ie, the whole UI,
+                        # including borders and top bar)
+                        # in later versions, they are relative to the top left
+                        # corner of the board
+                        "xpos": xpos - xoffs,
+                        "ypos": ypos - yoffs,
                     }
                 )
 
