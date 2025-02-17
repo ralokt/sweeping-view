@@ -28,6 +28,7 @@ def test_rmv2(replay_path):
     assert rmv.clone_id == 1
     assert rmv.major_version_of_clone == 5
     assert rmv.format_version == 2
+    assert rmv.square_size == 24
     assert rmv.player_data["name"] == "Thomas Kolar"
     assert rmv.player_data["nickname"] == "ralokt"
     assert rmv.properties["level"] == "beginner"
