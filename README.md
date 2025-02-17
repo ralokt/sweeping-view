@@ -22,6 +22,7 @@ Tested Python versions:
  - 3.10
  - 3.11
  - 3.12
+ - 3.13
 
 ## Is this a good idea? Shouldn't the formats be secret?
 
