@@ -70,31 +70,31 @@ class RMVReplay(BaseReplay):
     def process_buffer(self, data):
         # header 1
         extension = data.read(4)
-        ftype = self.read_int(data.read(2))
+        self.format_version = self.read_int(data.read(2))
 
-        if not (1 <= ftype <= 2):
-            raise UnknownFormatVersionError(self, ftype)
+        if not (1 <= self.format_version <= 2):
+            raise UnknownFormatVersionError(self, self.format_version)
 
-        if ftype >= 2:
+        if self.format_version >= 2:
             clone_id = self.read_int(data.read(1))
             major_version_of_clone = self.read_int(data.read(1))
 
         filesize = self.read_int(data.read(4))
 
         # header 2
-        if ftype == 1:
+        if self.format_version == 1:
             result_str_size = self.read_int(data.read(2))
         version_info_size = self.read_int(data.read(2))
         player_info_size = self.read_int(data.read(2))
         board_size = self.read_int(data.read(2))
         preflagged_size = self.read_int(data.read(2))
         properties_size = self.read_int(data.read(2))
-        if ftype >= 2:
+        if self.format_version >= 2:
             extension_properties_size = self.read_int(data.read(2))
         vid_size = self.read_int(data.read(4))
         checksum_size = self.read_int(data.read(2))
 
-        if ftype == 1:
+        if self.format_version == 1:
             # result string
             result_str = data.read(result_str_size)
 
@@ -138,7 +138,7 @@ class RMVReplay(BaseReplay):
         for _ in range(properties_size):
             properties.append(ord(data.read(1)))
 
-        utf8 = ftype >= 2
+        utf8 = self.format_version >= 2
         self.square_size = 16
         bbbv = None
 
@@ -152,9 +152,9 @@ class RMVReplay(BaseReplay):
             self.properties["level"] = self.LEVELS[properties[3]]
         except KeyError:
             raise InvalidReplayError(self, message="Invalid level!")
-        if ftype == 1 and properties_size > 4:
+        if self.format_version == 1 and properties_size > 4:
             utf8 = properties[4]
-        if ftype >= 2:
+        if self.format_version >= 2:
             bbbv = properties[4] + (properties[5] << 8)
             self.square_size = properties[6]
 
@@ -167,7 +167,7 @@ class RMVReplay(BaseReplay):
 
         result_str_field_list = (
             [i.strip() for i in result_str.decode(encoding).split("#") if i.strip()]
-            if ftype == 1
+            if self.format_version == 1
             else []
         )
         self.result_str_dict = {
@@ -177,7 +177,7 @@ class RMVReplay(BaseReplay):
         self.bbbv = int(self.result_str_dict["3BV"]) if bbbv is None else bbbv
 
         self.extension_properties = {}
-        if ftype >= 2:
+        if self.format_version >= 2:
             num_properties = self.read_int(data.read(2))
             for _ in range(num_properties):
                 key_size = ord(data.read(1))
@@ -191,7 +191,7 @@ class RMVReplay(BaseReplay):
         ypos = None
         gametime = None
         nFlags = None
-        (xoffs, yoffs) = (12, 56) if ftype == 1 else (0, 0)
+        (xoffs, yoffs) = (12, 56) if self.format_version == 1 else (0, 0)
         while data:
             evcode = ord(data.read(1))
             if evcode == 0:
