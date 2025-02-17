@@ -75,9 +75,11 @@ class RMVReplay(BaseReplay):
         if not (1 <= self.format_version <= 2):
             raise UnknownFormatVersionError(self, self.format_version)
 
+        self.clone_id = None
+        self.major_version_of_clone = None
         if self.format_version >= 2:
-            clone_id = self.read_int(data.read(1))
-            major_version_of_clone = self.read_int(data.read(1))
+            self.clone_id = self.read_int(data.read(1))
+            self.major_version_of_clone = self.read_int(data.read(1))
 
         filesize = self.read_int(data.read(4))
 
