@@ -114,8 +114,8 @@ from sweeping_view.evf import EVFReplay
 evf = EVFReplay.from_file("test_subject.evf")
 
 print(evf.user_identifier)
-print(rmv.bbbv)
-print(rmv.timeth)
+print(evf.bbbv)
+print(evf.timeth)
 ```
 
 #### output
